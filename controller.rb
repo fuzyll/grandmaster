@@ -31,6 +31,7 @@ module Grandmaster
         configure :development do
             set :slim, :pretty => true
         end
+        use Rack::Session::Cookie, { :http_only => true, :secret => SecureRandom.hex }
 
         # require application dependencies
         require "./model"

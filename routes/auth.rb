@@ -31,19 +31,49 @@ module Grandmaster
         end
         post "/register/?" do
             begin
+                # FIXME: validation of these parameters is absolutely awful
+                if !params[:address].include?("@") or !params[:address].include?(".")
+                    raise "Invalid E-Mail Address"
+                end
                 if !params[:tag].include?("#")
                     raise "Invalid Battle Tag"
                 end
-                Player.create(:name => params[:username],
-                              :password => params[:password],
-                              :address => params[:address],
-                              :tag => params[:tag],
-                              :rating => 2000)
+                player = Player.create(:tag => params[:tag])
+                account = Account.create(:name => params[:username],
+                                         :password => BCrypt::Password.create(params[:password]),
+                                         :address => params[:address],
+                                         :player => player.id)
+                redirect "/ladder"
             rescue Exception => e
                 @error = "Registration failed: #{e.message}"
                 slim :register
             end
-            redirect "/ladder"
+        end
+
+        # authentication
+        get "/logout/?" do
+            response.set_cookie("username", { :value => nil })
+            @error = "You are now logged out"
+            slim :login
+        end
+        get "/login/?" do
+            slim :login
+        end
+        post "/login/?" do
+            begin
+                account = Account.first(:name => params[:username])
+                if account and BCrypt::Password.new(account.password) == params[:password]
+                    response.set_cookie("username", { :value => account.name })
+                else
+                    raise "Invalid username or password"
+                end
+                # FIXME: should also do something like setting a unique token here
+                # FIXME: as it's currently implemented, changing your cookie's contents will re-authenticate you
+                redirect "/ladder"
+            rescue Exception => e
+                @error = "Authentication failed: #{e.message}"
+                slim :login
+            end
         end
     end
 end

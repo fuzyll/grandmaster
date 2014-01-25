@@ -29,20 +29,33 @@ module Grandmaster
         Database = Sequel.sqlite("./grandmaster.db")
 
         # create tables if they do not already exist
-        Database.create_table?("players") do
+        Database.create_table?("accounts") do
             primary_key :id
-            timestamp :timestamp, {
-                :default => Sequel::CURRENT_TIMESTAMP,
-                :null => false
-            }
+            timestamp :timestamp, { :default => Sequel::CURRENT_TIMESTAMP, :null => false }
             string :name, { :size => 32, :unique => true, :null => false }
             string :password, { :size => 64, :null => false }
             string :address, { :size => 64 }
+            integer :player, { :key => :players, :null => false }
+        end
+        Database.create_table?("players") do
+            primary_key :id
             string :tag, { :size => 32, :unique => true }
-            integer :rating, { :null => false }
+            float :rating, { :default => 3000.0, :null => false }
+            float :confidence, { :default => 3000.0/3, :null => false }
+        end
+        Database.create_table?("games") do
+            primary_key :id
+            timestamp :timestamp, { :default => Sequel::CURRENT_TIMESTAMP, :null => false }
+            integer :winner, { :key => :players, :null => false }
+            integer :loser, { :key => :players, :null => false }
         end
 
         # auto-generate classes representing the model for our database
+        class Account < Sequel::Model; end
         class Player < Sequel::Model; end
+        class Game < Sequel::Model; end
+
+        # create our trueskill environment
+        TrueSkillEnv = TrueSkillObject.new(3000.0, 3000.0/3, 3000.0/6, 3000.0/300, 0)
     end
 end

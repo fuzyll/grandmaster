@@ -1,0 +1,10 @@
+h2 Log In
+-if @error
+    p #{@error}
+form action="/login" method="post"
+    #username
+        input type="text" id="username" name="username" placeholder="Username"
+    #password
+        input type="password" id="password" name="password" placeholder="Password"
+    #submit
+        input type="submit" value="Authenticate"
