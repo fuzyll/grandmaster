@@ -1,1 +1,9 @@
 h2 Ladder
+table
+    tr
+        th Battle Tag
+        th Rating
+    - @players.each do |player|
+        tr
+            td #{player.tag}
+            td #{player.rating}

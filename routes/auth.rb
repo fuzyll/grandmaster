@@ -1,5 +1,5 @@
 ##
-# Grandmaster | StarCraft 2 Ladder (Content Routes)
+# Grandmaster | StarCraft 2 Ladder (Authentication Routes)
 #
 # Copyright (c) 2014 Alexander Taylor <ajtaylor@fuzyll.com>
 #
@@ -24,10 +24,26 @@
 
 module Grandmaster
     class Application < Sinatra::Base
-        # ladder
-        get "/ladder/?" do
-            @players = Player.order(:rating).all
-            slim :ladder
+        # registration
+        get "/register/?" do
+            @error = nil
+            slim :register
+        end
+        post "/register/?" do
+            begin
+                if !params[:tag].include?("#")
+                    raise "Invalid Battle Tag"
+                end
+                Player.create(:name => params[:username],
+                              :password => params[:password],
+                              :address => params[:address],
+                              :tag => params[:tag],
+                              :rating => 2000)
+            rescue Exception => e
+                @error = "Registration failed: #{e.message}"
+                slim :register
+            end
+            redirect "/ladder"
         end
     end
 end
