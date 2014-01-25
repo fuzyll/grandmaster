@@ -1,5 +1,5 @@
 ##
-# Grandmaster | StarCraft 2 Ladder (Controller)
+# Grandmaster | StarCraft 2 Ladder (Content Routes)
 #
 # Copyright (c) 2014 Alexander Taylor <ajtaylor@fuzyll.com>
 #
@@ -24,25 +24,9 @@
 
 module Grandmaster
     class Application < Sinatra::Base
-        # configure application
-        configure :production do
-            set :slim, :ugly => true
-        end
-        configure :development do
-            set :slim, :pretty => true
-        end
-
-        # require application dependencies
-        Dir["./routes/*.rb"].each do |route|
-            require route
-        end
-
-        # declare default routes
-        not_found do
-            halt 404
-        end
-        get "/?" do
-            redirect "/ladder"
+        # ladder
+        get "/ladder/?" do
+            slim :ladder
         end
     end
 end

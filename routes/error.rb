@@ -1,5 +1,5 @@
 ##
-# Grandmaster | StarCraft 2 Ladder (Controller)
+# Grandmaster | StarCraft 2 Ladder (Error Routes)
 #
 # Copyright (c) 2014 Alexander Taylor <ajtaylor@fuzyll.com>
 #
@@ -24,25 +24,34 @@
 
 module Grandmaster
     class Application < Sinatra::Base
-        # configure application
-        configure :production do
-            set :slim, :ugly => true
-        end
-        configure :development do
-            set :slim, :pretty => true
+        # default error
+        error do
+            @error = request.env["sinatra.error"]
+            slim :error
         end
 
-        # require application dependencies
-        Dir["./routes/*.rb"].each do |route|
-            require route
+        # 401 (not authorized)
+        error 401 do
+            @error = "Not Authorized"
+            slim :error
         end
 
-        # declare default routes
-        not_found do
-            halt 404
+        # 403 (forbidden)
+        error 403 do
+            @error = "Forbidden"
+            slim :error
         end
-        get "/?" do
-            redirect "/ladder"
+
+        # 404 (not found)
+        error 404 do
+            @error = "Not Found"
+            slim :error
+        end
+
+        # 501 (not implemented)
+        error 501 do
+            @error = "Not Implemented"
+            slim :error
         end
     end
 end
