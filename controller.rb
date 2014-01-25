@@ -33,6 +33,7 @@ module Grandmaster
         end
 
         # require application dependencies
+        require "./model"
         Dir["./routes/*.rb"].each do |route|
             require route
         end
