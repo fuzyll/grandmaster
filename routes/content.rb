@@ -44,7 +44,7 @@ module Grandmaster
             begin
                 # save the uploaded file to disk
                 data = params[:file][:tempfile].read
-                filename = "content/uploads/#{Digest::SHA1.hexdigest(data)}.SC2Replay"
+                filename = "#{settings.upload_folder}/#{Digest::SHA1.hexdigest(data)}.SC2Replay"
                 if File.exists?(filename)
                     @error = "Upload failed: Replay already uploaded"
                     return slim :upload
