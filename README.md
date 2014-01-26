@@ -34,6 +34,8 @@ The following need to be completed before Grandmaster is usable:
 * Need to prevent attacks on authentication (not currently using tokens)
 * Need to prevent race conditions on database with transactions
 * Need to create a theme so that pages aren't just black text on a white background
+* Need some way to re-validate all rankings (ratings are updated at time of upload, but games may not necessarily
+  be uploaded in that order, which can create opportunities for players to game the system)
 
 The following is a list of features that have yet to be added:
 
