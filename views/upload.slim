@@ -1,0 +1,8 @@
+h2 Upload
+-if @error
+    p #{@error}
+form action="/upload" method="post" enctype="multipart/form-data"
+    #file
+        input type="file" id="file" name="file" placeholder="/path/to/file"
+    #submit
+        input type="submit" value="Upload"

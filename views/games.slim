@@ -1,0 +1,20 @@
+h2 Games
+table
+    tr
+        th Date
+        th Type
+        th Map
+        th Winner
+        th Loser
+        th Quality
+        th Replay
+    - @games.each do |game|
+        tr
+            td #{DateTime.parse(game.timestamp.to_s).strftime("%a %b %d, %Y at %H:%M")}
+            td #{Rule.find(:id => game.type).name}
+            td #{Map.find(:id => game.map).name}
+            td #{Player.find(:id => game.winner).tag} [#{Race.find(:id => game.winner_race).name[0]}] +#{game.winner_change.to_i}
+            td #{Player.find(:id => game.loser).tag} [#{Race.find(:id => game.loser_race).name[0]}] #{game.loser_change.to_i}
+            td #{(game.quality * 100).to_i}%
+            td
+                a href="uploads/#{game.replay}" #{game.replay}

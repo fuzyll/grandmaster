@@ -35,9 +35,6 @@ module Grandmaster
                 if !params[:address].include?("@") or !params[:address].include?(".")
                     raise "Invalid E-Mail Address"
                 end
-                if !params[:tag].include?("#")
-                    raise "Invalid Battle Tag"
-                end
                 player = Player.create(:tag => params[:tag])
                 account = Account.create(:name => params[:username],
                                          :password => BCrypt::Password.create(params[:password]),
@@ -52,7 +49,7 @@ module Grandmaster
 
         # authentication
         get "/logout/?" do
-            response.set_cookie("username", { :value => nil })
+            response.set_cookie("username", { :value => nil, :max_age => "0" })
             @error = "You are now logged out"
             slim :login
         end

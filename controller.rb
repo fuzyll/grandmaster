@@ -32,6 +32,11 @@ module Grandmaster
             set :slim, :pretty => true
         end
         use Rack::Session::Cookie, { :http_only => true, :secret => SecureRandom.hex }
+        File.open("settings.yml", "r") do |file|
+            YAML.load(file.read()).each_pair do |key, value|
+                set key, value
+            end
+        end
 
         # require application dependencies
         require "./model"

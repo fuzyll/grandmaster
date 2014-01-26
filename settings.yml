@@ -1,0 +1,13 @@
+public_folder: ./content
+database_type: sqlite
+database: ./grandmaster.db
+maps:
+    - Alterzim Stronghold TE
+    - Daedalus Point
+    - Frost LE
+    - Habitation Station LE
+    - Heavy Rain LE
+    - Polar Night LE
+    - Yeonsu LE
+rules:
+    - 1v1
