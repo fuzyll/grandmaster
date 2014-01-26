@@ -80,6 +80,7 @@ module Grandmaster
         end
 
         # auto-generate classes representing the model for our database
+        # FIXME: there is currently 0 validation done on anything here, which is probably really bad
         class Account < Sequel::Model; end
         class Player < Sequel::Model; end
         class Race < Sequel::Model; end
@@ -88,17 +89,18 @@ module Grandmaster
         class Game < Sequel::Model; end
 
         # populate races if they don't already exist in the table
+        # FIXME: should probably place these in the config (would make porting to other games easier)
         ["Terran", "Zerg", "Protoss"].each do |race|
             Race.find_or_create(:name => race)
         end
 
         # populate maps if they don't already exist in the table
         Map.each do |entry|
-            entry.current = false
+            entry.update(:current => false)
         end
         settings.maps.each do |map|
             entry = Map.find_or_create(:name => map)
-            entry.current = true
+            entry.update(:current => true)
         end
 
         # populate rules if they don't already exist in the table

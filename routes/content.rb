@@ -54,6 +54,7 @@ module Grandmaster
                 end
 
                 # parse the replay and validate it
+                # FIXME: should maybe do the validation in the model? (might be very difficult, though)
                 replay = Tassadar::SC2::Replay.new(filename)
                 if replay.game.speed != "Faster"
                     raise "Games must be played on Faster speed to be accepted"
@@ -71,6 +72,8 @@ module Grandmaster
                 end
 
                 # determine match quality and update ratings
+                # FIXME: this could probably be accomplished with less variables and more comments
+                # FIXME: everything below also assumes a 1v1 match, which shouldn't necessarily be the case
                 replay_winner = (replay.players.select { |player| player.won == true })[0]
                 replay_loser = (replay.players.select { |player| player.won == false })[0]
                 winner = Player.find(:tag => replay_winner.name)
@@ -83,7 +86,7 @@ module Grandmaster
                 loser_new_rating = new_ratings[1][0]
 
                 # place the game in the database
-                # FIXME: debug
+                # FIXME: debug below
                 puts "Filename: #{filename.split("/")[-1]}"
                 puts "Game Type: #{replay.game.type}"
                 puts "Map: #{replay.game.map}"
@@ -97,7 +100,7 @@ module Grandmaster
                 puts "Loser Rating Change: #{loser_new_rating.mu - loser_old_rating.mu}"
                 puts "Winner New Confidence: #{winner_new_rating.sigma}"
                 puts "Match Quality: #{match_quality}"
-                # FIXME: debug
+                # FIXME: debug above
                 Game.create(:replay => filename.split("/")[-1],
                             :type => replay.game.type,
                             :map => Map.find(:name => replay.game.map).id,
@@ -111,6 +114,7 @@ module Grandmaster
                             :quality => match_quality)
 
                 # update player entries in the database
+                # FIXME: this should really be done in a transaction along with the above row creation (race condition)
                 winner.update(:rating => winner_new_rating.mu)
                 winner.update(:confidence => winner_new_rating.sigma)
                 loser.update(:rating => loser_new_rating.mu)
@@ -118,7 +122,7 @@ module Grandmaster
 
                 redirect "/ladder"
             rescue Exception => e
-                File.delete(filename)
+                File.delete(filename)  # FIXME: what happens if we couldn't read the file and don't have a filename?
                 @error = "Upload failed: #{e.message}"
                 slim :upload
             end

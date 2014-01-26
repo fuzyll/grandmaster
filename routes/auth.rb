@@ -32,6 +32,7 @@ module Grandmaster
         post "/register/?" do
             begin
                 # FIXME: validation of these parameters is absolutely awful
+                # FIXME: also, validation should be done in the model and not here
                 if !params[:address].include?("@") or !params[:address].include?(".")
                     raise "Invalid E-Mail Address"
                 end
