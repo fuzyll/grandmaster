@@ -16,7 +16,7 @@ The following will install all dependencies and start the Grandmaster on port 92
 sudo apt-get install ruby1.9.1
 gem install bundler
 bundle install --standalone
-bundle exec rackup application.ru
+bundle exec rackup config.ru
 ```
 
 Grandmaster can be run with a traditional webserver like Apache using Passenger,
