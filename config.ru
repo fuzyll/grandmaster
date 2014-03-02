@@ -12,7 +12,6 @@ end
 # set up logging when in production mode
 if ENV["RACK_ENV"] == "production"
     log = File.new("logs/sinatra.log", "a")
-    STDOUT.reopen(log)
     STDERR.reopen(log)
 end
 
