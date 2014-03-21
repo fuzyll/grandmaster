@@ -22,7 +22,16 @@
 # IN THE SOFTWARE.
 ##
 
+require "./settings"
+require "./model"
+
 module Grandmaster
+    # create ephemeral authentication tokens for every user
+    Tokens = {}
+    Account.each do |account|
+        Tokens[account.name] = { :timestamp => Time.now.to_i, :token => SecureRandom.hex }
+    end
+
     class Application < Sinatra::Base
         # configure application
         configure :production do
@@ -32,16 +41,26 @@ module Grandmaster
             set :slim, :pretty => true
         end
         use Rack::Session::Cookie, { :http_only => true, :secret => SecureRandom.hex }
-        File.open("settings.yml", "r") do |file|
-            YAML.load(file.read()).each_pair do |key, value|
-                set key, value
-            end
+        Settings.each_pair do |key, value|
+            set key, value
         end
 
-        # require application dependencies
-        require "./model"
-        Dir["./routes/*.rb"].each do |route|
-            require route
+        # declare helper functions
+        helpers do
+            # check if a user is authenticated
+            def authenticated?
+                if not Tokens.has_key?(request.cookies["username"])
+                    return false
+                elsif Tokens[request.cookies["username"]][:timestamp] < Time.now.to_i - 3600
+                    return false
+                end
+                return request.cookies["token"] == Tokens[request.cookies["username"]][:token]
+            end
+
+            # reset a user's authentication token
+            def reset_token!(username)
+                Tokens[username] = { :timestamp => Time.now.to_i, :token => SecureRandom.hex }
+            end
         end
 
         # declare default routes
@@ -50,6 +69,11 @@ module Grandmaster
         end
         get "/?" do
             redirect "/ladder"
+        end
+
+        # require additional routes
+        Dir["./routes/*.rb"].each do |route|
+            require route
         end
     end
 end

@@ -46,8 +46,7 @@ module Grandmaster
                 data = params[:file][:tempfile].read
                 filename = "#{settings.upload_folder}/#{Digest::SHA1.hexdigest(data)}.SC2Replay"
                 if File.exists?(filename)
-                    @error = "Upload failed: Replay already uploaded"
-                    return slim :upload
+                    raise "Replay already uploaded"
                 end
                 File.open(filename, "w") do |file|
                     file.write(data)
@@ -64,7 +63,7 @@ module Grandmaster
                 end
                 replay.players.each do |player|
                     if not Player.find(:tag => player.name)
-                        raise "All players must be on the ladder for replays to be accepted"
+                        raise "All players must be on the ladder for a replay to be accepted"
                     end
                 end
                 if not Map.find(:name => replay.game.map) or not Map.find(:name => replay.game.map).current
@@ -101,28 +100,34 @@ module Grandmaster
                 puts "Winner New Confidence: #{winner_new_rating.sigma}"
                 puts "Match Quality: #{match_quality}"
                 # FIXME: debug above
-                Game.create(:replay => filename.split("/")[-1],
-                            :type => replay.game.type,
-                            :map => Map.find(:name => replay.game.map).id,
-                            :timestamp => replay.game.time,
-                            :winner => winner.id,
-                            :winner_race => Race.find(:name => replay_winner.actual_race).id,
-                            :winner_change => winner_new_rating.mu - winner_old_rating.mu,
-                            :loser => loser.id,
-                            :loser_race => Race.find(:name => replay_loser.actual_race).id,
-                            :loser_change => loser_new_rating.mu - loser_old_rating.mu,
-                            :quality => match_quality)
 
-                # update player entries in the database
-                # FIXME: this should really be done in a transaction along with the above row creation (race condition)
-                winner.update(:rating => winner_new_rating.mu)
-                winner.update(:confidence => winner_new_rating.sigma)
-                loser.update(:rating => loser_new_rating.mu)
-                loser.update(:confidence => loser_new_rating.sigma)
+                # create game and update player entries in the database
+                Database.transaction do
+                    Game.create(:replay => filename.split("/")[-1],
+                                :type => replay.game.type,
+                                :map => Map.find(:name => replay.game.map).id,
+                                :timestamp => replay.game.time,
+                                :winner => winner.id,
+                                :winner_race => Race.find(:name => replay_winner.actual_race).id,
+                                :winner_change => winner_new_rating.mu - winner_old_rating.mu,
+                                :loser => loser.id,
+                                :loser_race => Race.find(:name => replay_loser.actual_race).id,
+                                :loser_change => loser_new_rating.mu - loser_old_rating.mu,
+                                :quality => match_quality)
+                    winner.update(:wins => winner.wins + 1)
+                    winner.update(:rating => winner_new_rating.mu)
+                    winner.update(:confidence => winner_new_rating.sigma)
+                    loser.update(:losses => loser.losses + 1)
+                    loser.update(:rating => loser_new_rating.mu)
+                    loser.update(:confidence => loser_new_rating.sigma)
+                end
 
                 redirect "/ladder"
             rescue Exception => e
-                File.delete(filename)  # FIXME: what happens if we couldn't read the file and don't have a filename?
+                begin
+                    File.delete(filename)
+                rescue  # if the file was never created, we don't particularly care if this failed
+                end
                 @error = "Upload failed: #{e.message}"
                 slim :upload
             end

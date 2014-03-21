@@ -2,6 +2,10 @@ public_folder: ./content
 upload_folder: ./content/uploads
 database_type: sqlite
 database: ./grandmaster.db
+races:
+    - Terran
+    - Zerg
+    - Protoss
 maps:
     - Alterzim Stronghold TE
     - Daedalus Point
