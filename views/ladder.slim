@@ -2,8 +2,12 @@ h2 Ladder
 table
     tr
         th Battle Tag
+        th Wins
+        th Losses
         th Rating
     - @players.each do |player|
         tr
             td #{player.tag}
-            td #{player.rating.to_i}
+            td.center #{player.wins}
+            td.center #{player.losses}
+            td.center #{player.rating.to_i}

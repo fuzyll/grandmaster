@@ -85,7 +85,7 @@ module Grandmaster
                 if account and BCrypt::Password.new(account.password) == params[:password]
                     reset_token!(account.name)
                     response.set_cookie("username", { :value => account.name })
-                    response.set_cookie("token", { :value => Tokens[account.name][:token] }
+                    response.set_cookie("token", { :value => Tokens[account.name][:token] })
                 else
                     raise "Invalid username or password"
                 end
